@@ -1,0 +1,24 @@
+language: rust
+
+matrix:
+  fast_finish: true
+  include:
+    - os: linux
+      rust: stable
+      env: TARGET=x86_64-unknown-linux-gnu
+    - os: osx
+      rust: stable
+      env: TARGET=x86_64-apple-darwin
+
+before_deploy: ci/before-deploy.sh
+deploy:
+  provider: releases
+  file_glob: true
+  file: deployment/ass-cli-${TARGET}.tar.gz
+  skip_cleanup: true
+  on:
+    repo: mipli/ass-cli
+    branch: master
+    tags: true
+  api_key:
+    secure: W4M/M+E5WbIcnbLghmn91gf2dhL+jD/K7ifJ3AvtsNqsSH5JyxghwNY2QfEQuRjxe8Uan7mTgenLHQqb1Nzc8BUq98nBZKvAB/1ciZfGbNT9OgpVJCplVyfcB8MQl0i4j6AzX9cQIVG0VJcRSsv/3oV4My1mnQGNEUn3Rpp6y1doe3ny7dmMUR0uDzQ4uYNRBwJIoqVvbTrAm1C38IUawdECjOdhZ7cBaYWO8DXik34Ok6rMZKE6xNS676CxIG382OQg1KtDxSxe3Q8lI70omXqBBfbvGYGGatbAV/ZIGtHl8IuXAiMRCgvf8SfvQFQGlE42M9N+TDAxsBidm+tBzVBxGuJX8Dp6viaeAwcQMFsjX3m2E0M1UcoEVQWYx+XqU5uBeWLgb3EvplJdUCBdqxaU+ssaylUnPDxw7QfWTuJDttFXB+b1R0K+cmgIsK+X7wNI05Rdcic0Q7fL7hoJA9kWP5IekrrW14vD6Vp8tsNbUdYHT/3mB6mNn5qfUYXW+BIOihrZpLJto9H00JRYY+5Dc3i+qdu4fEP3NF5ihDmJ4fWCcdA/MNIRBZiFL/d8uxp1Gk+Hjt+zIcoAWfnNJKAUzojYae/rQ8ARuPxcPi4ad0wtfO1DKl1mzFdY46gIfjpbtQ5mecRiMaL96aN/3XPfCggtF4pnIIXnB7zKGoM=
