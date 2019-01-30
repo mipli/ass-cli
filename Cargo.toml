@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 description = "A small CLI tool for working with Aptoma Smooth Storage"
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/mipli/ass-cli"
+readme = "README.md"
+keywords = []
 
 [dependencies]
 clap = "2.32.0"
@@ -14,3 +18,6 @@ reqwest = "0.9.8"
 ring = "0.14.2"
 termcolor = "1.0.4"
 dirs = "1.0.4"
+failure = "0.1.5"
+failure_derive = "0.1.5"
+ass-rs = "0.8.0"

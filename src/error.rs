@@ -1,48 +1,46 @@
-#[derive(Debug)]
-pub enum Error {
-    InvalidAccountFile(String),
-    NotFound(String),
-    PermissionDenied(String),
-    ArgumentParseError(String),
-    RequestError,
-    PathError,
-    UrlParseError,
+use failure::{*};
+use ass_rs::{AssError};
+
+#[derive(Fail, Debug)]
+pub enum AssCliError {
+    #[fail(display = "Error accessing ASS: {}", err)]
+    AssError {
+        err: AssError
+    },
+    #[fail(display = "Error parsing arguments: {}", message)]
+    ArgumentParseError {
+        message: String
+    },
+    #[fail(display = "Error parsing json")]
     JsonError,
-    InvalidHeaderValue
+    #[fail(display = "Error accessing path")]
+    PathError,
+    #[fail(display = "Std IO Error")]
+    StdIOError,
 }
 
-impl From<reqwest::header::InvalidHeaderValue> for Error {
-    fn from(_err: reqwest::header::InvalidHeaderValue) -> Error {
-        Error::InvalidHeaderValue
+impl From<clap::Error> for AssCliError {
+    fn from(err: clap::Error) -> AssCliError {
+        AssCliError::ArgumentParseError{ message: err.message }
     }
 }
 
-impl From<clap::Error> for Error {
-    fn from(err: clap::Error) -> Error {
-        Error::ArgumentParseError(err.message)
+impl From<serde_json::Error> for AssCliError {
+    fn from(_err: serde_json::Error) -> AssCliError {
+        AssCliError::JsonError
     }
 }
 
-impl From<reqwest::UrlError> for Error {
-    fn from(_err: reqwest::UrlError) -> Error {
-        Error::UrlParseError
+impl From<AssError> for AssCliError {
+    fn from(err: AssError) -> AssCliError {
+        AssCliError::AssError {
+            err
+        }
     }
 }
 
-impl From<std::io::Error> for Error {
-    fn from(_err: std::io::Error) -> Error {
-        Error::PathError
-    }
-}
-
-impl From<reqwest::Error> for Error {
-    fn from(_err: reqwest::Error) -> Error {
-        Error::RequestError
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(_err: serde_json::Error) -> Error {
-        Error::JsonError
+impl From<std::io::Error> for AssCliError {
+    fn from(_err: std::io::Error) -> AssCliError {
+        AssCliError::StdIOError
     }
 }

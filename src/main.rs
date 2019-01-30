@@ -1,21 +1,23 @@
-use clap::{Arg, ArgMatches, App, SubCommand};
+use clap::{Arg, ArgMatches, App, AppSettings, SubCommand};
 use termcolor::{BufferWriter, ColorChoice};
+use ass_rs::{Account};
+use failure::{Error};
+use std::path::{PathBuf};
 
+mod error;
 mod image;
 mod file;
-mod data;
-mod ass;
-mod account;
-mod error;
 
-use account::{Account};
-use error::{Error};
+use error::{AssCliError};
 
 fn main() -> Result<(), Error> {
+    let config_dir = dirs::config_dir().ok_or(AssCliError::PathError)?;
+    let config_dir_string = config_dir.to_str().ok_or(AssCliError::PathError)?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
                           .version("0.1")
                           .author("Michael Plikk <michael@plikk.com>")
                           .about("Tool to ease interaction with ASS from the CLI")
+                          .setting(AppSettings::ArgRequiredElseHelp)
                           .arg(Arg::with_name("config")
                                .short("c")
                                .long("config")
@@ -27,7 +29,7 @@ fn main() -> Result<(), Error> {
                                .long("account")
                                .takes_value(true)
                                .conflicts_with("config")
-                               .help("Account name, using account file in ~/.config/ass-cli/<account>.conf"))
+                               .help(&format!("Account name, using account file in {}/ass-cli/<account>.conf", config_dir_string)))
                           .subcommand(SubCommand::with_name("image")
                                       .about("Operate on ASS images")
                                       .subcommand(SubCommand::with_name("data")
@@ -65,7 +67,7 @@ fn main() -> Result<(), Error> {
                           )
                           .get_matches();
 
-    let account = get_account(&matches)?;
+    let account = get_account(&config_dir, &matches)?;
 
     let bufwtr = BufferWriter::stdout(ColorChoice::Always);
     let mut buffer = bufwtr.buffer();
@@ -81,13 +83,13 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn get_account(matches: &ArgMatches) -> Result<Account, Error> {
-    if let Some(acc) = matches.value_of("account") {
-        let config_dir = dirs::config_dir().ok_or(Error::PathError)?;
+fn get_account(config_dir: &PathBuf, matches: &ArgMatches) -> Result<Account, AssCliError> {
+    let account = if let Some(acc) = matches.value_of("account") {
         let path = config_dir.join(format!("ass-cli/{}.json", acc));
-        Account::from_file(path)
+        Account::from_file(path)?
     } else {
         let config = matches.value_of("config").unwrap_or("account.json");
-        Account::from_file(&config)
-    }
+        Account::from_file(&config)?
+    };
+    Ok(account)
 }
