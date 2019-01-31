@@ -30,6 +30,10 @@ fn main() -> Result<(), Error> {
                                .takes_value(true)
                                .conflicts_with("config")
                                .help(&format!("Account name, using account file in {}/ass-cli/<account>.conf", config_dir_string)))
+                          .arg(Arg::with_name("verbose")
+                               .short("v")
+                               .long("verbose")
+                               .help("Verbose output"))
                           .subcommand(SubCommand::with_name("image")
                                       .about("Operate on ASS images")
                                       .subcommand(SubCommand::with_name("data")
@@ -64,17 +68,24 @@ fn main() -> Result<(), Error> {
                                                       .required(true)
                                                       .min_values(1)
                                                       .help("file path")))
+                                      .subcommand(SubCommand::with_name("search")
+                                                  .about("search for files")
+                                                  .arg(Arg::with_name("path")
+                                                      .required(true)
+                                                      .help("file path to search for")))
                           )
                           .get_matches();
 
     let account = get_account(&config_dir, &matches)?;
 
+    let verbose = matches.is_present("verbose");
+
     let bufwtr = BufferWriter::stdout(ColorChoice::Always);
     let mut buffer = bufwtr.buffer();
 
     match matches.subcommand() {
-        ("image", Some(matches)) => image::handle(&account, matches, &mut buffer)?,
-        ("file", Some(matches)) => file::handle(&account, matches, &mut buffer)?,
+        ("image", Some(matches)) => image::handle(&account, matches, &mut buffer, verbose)?,
+        ("file", Some(matches)) => file::handle(&account, matches, &mut buffer, verbose)?,
         _ => {}
     }
 

@@ -7,25 +7,27 @@ use failure::{Error};
 use ass_rs::{Account};
 use crate::{AssCliError};
 
-pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), Error> {
+pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error> {
     match matches.subcommand() {
         ("data", Some(matches)) => get_data(account, matches, buffer),
         ("url", Some(matches)) => handle_url(account, matches, buffer),
-        ("upload", Some(matches)) => handle_upload(account, matches, buffer),
+        ("upload", Some(matches)) => handle_upload(account, matches, buffer, verbose),
         _ => unreachable!()
     }
 }
 
-fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), Error>  {
+fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error>  {
     let files = values_t!(matches.values_of("files"), String)?;
 
     for file in &files {
         let data = account.upload_image(file)?;
 
-        buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
-        write!(buffer, "\nImage uploaded: ")?;
-        buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
-        writeln!(buffer, "{}", data)?;
+        if verbose {
+            buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
+            write!(buffer, "\nImage uploaded: ")?;
+            buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
+            writeln!(buffer, "{}", data)?;
+        }
 
         let url = account.get_image_url(data.get_id().ok_or(AssCliError::JsonError)?)?;
         write_url(&url, buffer)?;
