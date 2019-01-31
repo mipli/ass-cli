@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/mipli/ass-cli.svg?branch=master)](https://travis-ci.com/mipli/ass-cli)
+
 # Aptoma Smooth Storage CLI
 
 A small CLI tool for working with Aptoma Smooth Storage.
