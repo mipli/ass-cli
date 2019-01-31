@@ -15,6 +15,7 @@ main() {
   local tmpdir="$(mktemp -d)"
   local name="ass-cli-${TARGET}"
   local staging="$tmpdir/$name"
+  mkdir -p "$staging"
   local out_dir="$(pwd)/deployment"
   mkdir -p "$out_dir"
 
