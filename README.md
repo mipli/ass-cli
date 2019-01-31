@@ -4,6 +4,15 @@
 
 A small CLI tool for working with Aptoma Smooth Storage.
 
+## Install
+
+If you have `cargo` installed you can install `ass-cli` using
+
+```console
+$ cargo install ass-cli
+```
+
+Otherwise you can download the latest binary from [Releases](https://github.com/mipli/ass-cli/releases/)
 
 ## Example Usage
 
