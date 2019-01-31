@@ -72,7 +72,7 @@ fn main() -> Result<(), Error> {
                                                   .about("search for files")
                                                   .arg(Arg::with_name("path")
                                                       .required(true)
-                                                      .help("file path to search for")))
+                                                      .help("file path to search for. Path is exact match, use '%' as wildcard")))
                           )
                           .get_matches();
 
