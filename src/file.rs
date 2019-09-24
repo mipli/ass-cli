@@ -40,9 +40,10 @@ fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
         Some('/') => {},
         _ => destination.push_str("/")
     };
+    let cache_time = value_t!(matches, "cache", u32)?;
     let files = values_t!(matches.values_of("files"), String)?;
     for file in &files {
-        let data = account.upload_file(file, &destination)?;
+        let data = account.upload_file_with_cache(file, &destination, cache_time)?;
 
         if verbose {
             buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
