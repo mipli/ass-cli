@@ -15,7 +15,7 @@ pub fn handle(
     match matches.subcommand() {
         ("upload", Some(matches)) => handle_upload(account, matches, buffer, verbose),
         ("search", Some(matches)) => handle_search(account, matches, buffer, verbose),
-        _ => unreachable!(),
+        _ => Err(AssCliError::command_error()),
     }
 }
 

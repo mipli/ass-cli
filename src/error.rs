@@ -12,6 +12,8 @@ pub struct AssCliError {
 
 #[derive(Debug, Display, Eq, PartialEq)]
 pub enum AssCliErrorKind {
+    #[display(fmt = "Invalid arguments, use --help for more information")]
+    CommandError,
     #[display(fmt = "Error accessing ASS: {}", _0)]
     AssError(String),
     #[display(fmt = "Url does not match account")]
@@ -32,6 +34,13 @@ impl AssCliError {
     pub fn invalid_account_file(msg: String)  -> Self {
         AssCliError {
             kind: AssCliErrorKind::InvalidAccountFile(msg),
+            source: None,
+        }
+    }
+
+    pub fn command_error() -> Self {
+        AssCliError {
+            kind: AssCliErrorKind::CommandError,
             source: None,
         }
     }

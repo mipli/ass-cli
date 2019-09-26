@@ -16,7 +16,7 @@ pub fn handle(
         ("data", Some(matches)) => get_data(account, matches, buffer),
         ("url", Some(matches)) => handle_url(account, matches, buffer),
         ("upload", Some(matches)) => handle_upload(account, matches, buffer, verbose),
-        _ => unreachable!(),
+        _ => Err(AssCliError::command_error()),
     }
 }
 
