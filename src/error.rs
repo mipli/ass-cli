@@ -1,7 +1,7 @@
 use derive_more::*;
 
+use ass_rs::AssError;
 use std::error::Error;
-use ass_rs::{AssError};
 
 #[derive(Debug, Display)]
 #[display(fmt = "{}", kind)]
@@ -28,14 +28,14 @@ impl AssCliError {
     pub fn json_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::JsonError,
-            source: None
+            source: None,
         }
     }
 
     pub fn path_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::PathError,
-            source: None
+            source: None,
         }
     }
 }
@@ -44,7 +44,7 @@ impl From<clap::Error> for AssCliError {
     fn from(err: clap::Error) -> AssCliError {
         AssCliError {
             kind: AssCliErrorKind::ArgumentParseError(err.message.clone()),
-            source: Some(Box::new(err))
+            source: Some(Box::new(err)),
         }
     }
 }
@@ -53,7 +53,7 @@ impl From<AssError> for AssCliError {
     fn from(err: AssError) -> AssCliError {
         AssCliError {
             kind: AssCliErrorKind::AssError,
-            source: Some(Box::new(err))
+            source: Some(Box::new(err)),
         }
     }
 }
@@ -62,7 +62,7 @@ impl From<std::io::Error> for AssCliError {
     fn from(err: std::io::Error) -> AssCliError {
         AssCliError {
             kind: AssCliErrorKind::StdIOError,
-            source: Some(Box::new(err))
+            source: Some(Box::new(err)),
         }
     }
 }

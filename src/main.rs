@@ -1,91 +1,125 @@
-use clap::{Arg, ArgMatches, App, AppSettings, SubCommand};
+use ass_rs::Account;
+use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
+pub use error::AssCliError;
+use std::path::PathBuf;
 use termcolor::{BufferWriter, ColorChoice};
-use ass_rs::{Account};
-use std::path::{PathBuf};
-pub use error::{AssCliError};
 
 mod error;
-mod image;
 mod file;
+mod image;
 mod sign;
 
 fn main() -> Result<(), AssCliError> {
     let config_dir = dirs::config_dir().ok_or(AssCliError::path_error())?;
     let config_dir_string = config_dir.to_str().ok_or(AssCliError::path_error())?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
-                          .version("0.1")
-                          .author("Michael Plikk <michael@plikk.com>")
-                          .about("Tool to ease interaction with ASS from the CLI")
-                          .setting(AppSettings::ArgRequiredElseHelp)
-                          .arg(Arg::with_name("config")
-                               .short("c")
-                               .long("config")
-                               .takes_value(true)
-                               .conflicts_with("account")
-                               .help("Path to config file with account information"))
-                          .arg(Arg::with_name("account")
-                               .short("a")
-                               .long("account")
-                               .takes_value(true)
-                               .conflicts_with("config")
-                               .help(&format!("Account name, using account file in {}/ass-cli/<account>.conf", config_dir_string)))
-                          .arg(Arg::with_name("verbose")
-                               .short("v")
-                               .long("verbose")
-                               .help("Verbose output"))
-                          .subcommand(SubCommand::with_name("image")
-                                      .about("Operate on ASS images")
-                                      .subcommand(SubCommand::with_name("data")
-                                                  .about("get data about image")
-                                                  .arg(Arg::with_name("id")
-                                                      .index(1)
-                                                      .required(true)
-                                                      .help("Image id to get")))
-                                      .subcommand(SubCommand::with_name("url")
-                                                  .about("get signed url for image")
-                                                  .arg(Arg::with_name("id")
-                                                      .index(1)
-                                                      .required(true)
-                                                      .help("Image id to get")))
-                                      .subcommand(SubCommand::with_name("upload")
-                                                  .about("upload image from path")
-                                                  .arg(Arg::with_name("files")
-                                                      .required(true)
-                                                      .min_values(1)
-                                                      .help("image path")))
-                          )
-                          .subcommand(SubCommand::with_name("file")
-                                      .about("Operate on ASS files")
-                                      .subcommand(SubCommand::with_name("upload")
-                                                  .about("upload file from path")
-                                                  .arg(Arg::with_name("destination")
-                                                       .short("d")
-                                                       .long("destination")
-                                                       .takes_value(true)
-                                                       .help("destination folder on server"))
-                                                  .arg(Arg::with_name("cache")
-                                                       .short("c")
-                                                       .long("cache")
-                                                       .default_value("31557600")
-                                                       .help("cache time for uploaded file, in seconds"))
-                                                  .arg(Arg::with_name("files")
-                                                       .required(true)
-                                                       .min_values(1)
-                                                       .help("file path")))
-                                      .subcommand(SubCommand::with_name("search")
-                                                  .about("search for files")
-                                                  .arg(Arg::with_name("path")
-                                                       .required(true)
-                                                       .help("file path to search for. Path is exact match, use '%' as wildcard")))
-                                      )
-                          .subcommand(SubCommand::with_name("sign")
-                                      .about("Sign a Url")
-                                      .arg(Arg::with_name("url")
-                                           .index(1)
-                                           .required(true)
-                                           .help("url to sign"))
-                          )
-                          .get_matches();
+        .version("0.1")
+        .author("Michael Plikk <michael@plikk.com>")
+        .about("Tool to ease interaction with ASS from the CLI")
+        .setting(AppSettings::ArgRequiredElseHelp)
+        .arg(
+            Arg::with_name("config")
+                .short("c")
+                .long("config")
+                .takes_value(true)
+                .conflicts_with("account")
+                .help("Path to config file with account information"),
+        )
+        .arg(
+            Arg::with_name("account")
+                .short("a")
+                .long("account")
+                .takes_value(true)
+                .conflicts_with("config")
+                .help(&format!(
+                    "Account name, using account file in {}/ass-cli/<account>.conf",
+                    config_dir_string
+                )),
+        )
+        .arg(
+            Arg::with_name("verbose")
+                .short("v")
+                .long("verbose")
+                .help("Verbose output"),
+        )
+        .subcommand(
+            SubCommand::with_name("image")
+                .about("Operate on ASS images")
+                .subcommand(
+                    SubCommand::with_name("data")
+                        .about("get data about image")
+                        .arg(
+                            Arg::with_name("id")
+                                .index(1)
+                                .required(true)
+                                .help("Image id to get"),
+                        ),
+                )
+                .subcommand(
+                    SubCommand::with_name("url")
+                        .about("get signed url for image")
+                        .arg(
+                            Arg::with_name("id")
+                                .index(1)
+                                .required(true)
+                                .help("Image id to get"),
+                        ),
+                )
+                .subcommand(
+                    SubCommand::with_name("upload")
+                        .about("upload image from path")
+                        .arg(
+                            Arg::with_name("files")
+                                .required(true)
+                                .min_values(1)
+                                .help("image path"),
+                        ),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("file")
+                .about("Operate on ASS files")
+                .subcommand(
+                    SubCommand::with_name("upload")
+                        .about("upload file from path")
+                        .arg(
+                            Arg::with_name("destination")
+                                .short("d")
+                                .long("destination")
+                                .takes_value(true)
+                                .help("destination folder on server"),
+                        )
+                        .arg(
+                            Arg::with_name("cache")
+                                .short("c")
+                                .long("cache")
+                                .default_value("31557600")
+                                .help("cache time for uploaded file, in seconds"),
+                        )
+                        .arg(
+                            Arg::with_name("files")
+                                .required(true)
+                                .min_values(1)
+                                .help("file path"),
+                        ),
+                )
+                .subcommand(
+                    SubCommand::with_name("search")
+                        .about("search for files")
+                        .arg(Arg::with_name("path").required(true).help(
+                            "file path to search for. Path is exact match, use '%' as wildcard",
+                        )),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("sign").about("Sign a Url").arg(
+                Arg::with_name("url")
+                    .index(1)
+                    .required(true)
+                    .help("url to sign"),
+            ),
+        )
+        .get_matches();
 
     let account = get_account(&config_dir, &matches)?;
 

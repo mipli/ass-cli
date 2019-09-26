@@ -1,21 +1,31 @@
-use clap::{ArgMatches, value_t, values_t};
+use clap::{value_t, values_t, ArgMatches};
 use std::io::Write;
-use termcolor::{Buffer};
+use termcolor::Buffer;
 use termcolor::{Color, ColorSpec, WriteColor};
 
-use ass_rs::{Account};
-use crate::{AssCliError};
+use crate::AssCliError;
+use ass_rs::Account;
 
-pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError> {
+pub fn handle(
+    account: &Account,
+    matches: &ArgMatches,
+    buffer: &mut Buffer,
+    verbose: bool,
+) -> Result<(), AssCliError> {
     match matches.subcommand() {
         ("data", Some(matches)) => get_data(account, matches, buffer),
         ("url", Some(matches)) => handle_url(account, matches, buffer),
         ("upload", Some(matches)) => handle_upload(account, matches, buffer, verbose),
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
-fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError>  {
+fn handle_upload(
+    account: &Account,
+    matches: &ArgMatches,
+    buffer: &mut Buffer,
+    verbose: bool,
+) -> Result<(), AssCliError> {
     let files = values_t!(matches.values_of("files"), String)?;
 
     for file in &files {
@@ -35,7 +45,11 @@ fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
     Ok(())
 }
 
-fn get_data(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), AssCliError>  {
+fn get_data(
+    account: &Account,
+    matches: &ArgMatches,
+    buffer: &mut Buffer,
+) -> Result<(), AssCliError> {
     let image_id = value_t!(matches, "id", u64)?;
     let data = account.get_image_information(image_id)?;
 
@@ -50,7 +64,11 @@ fn get_data(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Res
     Ok(())
 }
 
-fn handle_url(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), AssCliError>  {
+fn handle_url(
+    account: &Account,
+    matches: &ArgMatches,
+    buffer: &mut Buffer,
+) -> Result<(), AssCliError> {
     let image_id = value_t!(matches, "id", u64)?;
 
     let url = account.get_image_url(image_id)?;
