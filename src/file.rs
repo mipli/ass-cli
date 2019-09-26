@@ -2,12 +2,11 @@ use clap::{ArgMatches, value_t, values_t};
 use std::io::Write;
 use termcolor::{Buffer};
 use termcolor::{Color, ColorSpec, WriteColor};
-use failure::{Error};
 
 use ass_rs::{Account};
 use crate::{AssCliError};
 
-pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error> {
+pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError> {
     match matches.subcommand() {
         ("upload", Some(matches)) => handle_upload(account, matches, buffer, verbose),
         ("search", Some(matches)) => handle_search(account, matches, buffer, verbose),
@@ -15,7 +14,7 @@ pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verb
     }
 }
 
-fn handle_search(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error>  {
+fn handle_search(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError>  {
     let path = value_t!(matches, "path", String)?;
     let queries = vec![("path", &path[..])];
     let files = account.search_files(&queries)?;
@@ -27,14 +26,14 @@ fn handle_search(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
             writeln!(buffer, "{}", file)?;
         }
 
-        let url = account.get_file_url(file.get_path().ok_or(AssCliError::JsonError)?)?;
+        let url = account.get_file_url(file.get_path().ok_or(AssCliError::json_error())?)?;
         write_url(&url, buffer)?;
 
     }
     Ok(())
 }
 
-fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error>  {
+fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError>  {
     let mut destination = value_t!(matches, "destination", String)?;
     match destination.chars().last() {
         Some('/') => {},
@@ -43,7 +42,7 @@ fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
     let cache_time = value_t!(matches, "cache", u32)?;
     let files = values_t!(matches.values_of("files"), String)?;
     for file in &files {
-        let data = account.upload_file_with_cache(file, &destination, cache_time)?;
+        let data = account.upload_file_with_headers(file, &destination, &[("Cache-Control", &format!("max-age: {}", cache_time))])?;
 
         if verbose {
             buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
@@ -52,14 +51,14 @@ fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
             writeln!(buffer, "{}", data)?;
         }
 
-        let url = account.get_file_url(data.get_path().ok_or(AssCliError::JsonError)?)?;
+        let url = account.get_file_url(data.get_path().ok_or(AssCliError::json_error())?)?;
         write_url(&url, buffer)?;
 
     }
     Ok(())
 }
 
-fn write_url(url: &str, buffer: &mut Buffer) -> Result<(), Error> {
+fn write_url(url: &str, buffer: &mut Buffer) -> Result<(), AssCliError> {
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
     write!(buffer, "URL: ")?;
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;

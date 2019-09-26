@@ -1,18 +1,17 @@
 use clap::{Arg, ArgMatches, App, AppSettings, SubCommand};
 use termcolor::{BufferWriter, ColorChoice};
 use ass_rs::{Account};
-use failure::{Error};
 use std::path::{PathBuf};
+pub use error::{AssCliError};
 
 mod error;
 mod image;
 mod file;
+mod sign;
 
-use error::{AssCliError};
-
-fn main() -> Result<(), Error> {
-    let config_dir = dirs::config_dir().ok_or(AssCliError::PathError)?;
-    let config_dir_string = config_dir.to_str().ok_or(AssCliError::PathError)?;
+fn main() -> Result<(), AssCliError> {
+    let config_dir = dirs::config_dir().ok_or(AssCliError::path_error())?;
+    let config_dir_string = config_dir.to_str().ok_or(AssCliError::path_error())?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
                           .version("0.1")
                           .author("Michael Plikk <michael@plikk.com>")
@@ -79,6 +78,13 @@ fn main() -> Result<(), Error> {
                                                        .required(true)
                                                        .help("file path to search for. Path is exact match, use '%' as wildcard")))
                                       )
+                          .subcommand(SubCommand::with_name("sign")
+                                      .about("Sign a Url")
+                                      .arg(Arg::with_name("url")
+                                           .index(1)
+                                           .required(true)
+                                           .help("url to sign"))
+                          )
                           .get_matches();
 
     let account = get_account(&config_dir, &matches)?;
@@ -91,6 +97,7 @@ fn main() -> Result<(), Error> {
     match matches.subcommand() {
         ("image", Some(matches)) => image::handle(&account, matches, &mut buffer, verbose)?,
         ("file", Some(matches)) => file::handle(&account, matches, &mut buffer, verbose)?,
+        ("sign", Some(matches)) => sign::handle(&account, matches, &mut buffer, verbose)?,
         _ => {}
     }
 

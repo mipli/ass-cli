@@ -2,12 +2,11 @@ use clap::{ArgMatches, value_t, values_t};
 use std::io::Write;
 use termcolor::{Buffer};
 use termcolor::{Color, ColorSpec, WriteColor};
-use failure::{Error};
 
 use ass_rs::{Account};
 use crate::{AssCliError};
 
-pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error> {
+pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError> {
     match matches.subcommand() {
         ("data", Some(matches)) => get_data(account, matches, buffer),
         ("url", Some(matches)) => handle_url(account, matches, buffer),
@@ -16,7 +15,7 @@ pub fn handle(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verb
     }
 }
 
-fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), Error>  {
+fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, verbose: bool) -> Result<(), AssCliError>  {
     let files = values_t!(matches.values_of("files"), String)?;
 
     for file in &files {
@@ -29,16 +28,16 @@ fn handle_upload(account: &Account, matches: &ArgMatches, buffer: &mut Buffer, v
             writeln!(buffer, "{}", data)?;
         }
 
-        let url = account.get_image_url(data.get_id().ok_or(AssCliError::JsonError)?)?;
+        let url = account.get_image_url(data.get_id().ok_or(AssCliError::json_error())?)?;
         write_url(&url, buffer)?;
     }
 
     Ok(())
 }
 
-fn get_data(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), Error>  {
+fn get_data(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), AssCliError>  {
     let image_id = value_t!(matches, "id", u64)?;
-    let data = account.get_image_data(image_id)?;
+    let data = account.get_image_information(image_id)?;
 
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
     write!(buffer, "\nOutput: ")?;
@@ -51,7 +50,7 @@ fn get_data(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Res
     Ok(())
 }
 
-fn handle_url(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), Error>  {
+fn handle_url(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> Result<(), AssCliError>  {
     let image_id = value_t!(matches, "id", u64)?;
 
     let url = account.get_image_url(image_id)?;
@@ -60,7 +59,7 @@ fn handle_url(account: &Account, matches: &ArgMatches, buffer: &mut Buffer) -> R
     Ok(())
 }
 
-fn write_url(url: &str, buffer: &mut Buffer) -> Result<(), Error> {
+fn write_url(url: &str, buffer: &mut Buffer) -> Result<(), AssCliError> {
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
     write!(buffer, "URL: ")?;
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
