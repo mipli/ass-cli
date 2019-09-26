@@ -52,8 +52,8 @@ fn run() -> Result<(), AssCliError> {
             SubCommand::with_name("image")
                 .about("Operate on ASS images")
                 .subcommand(
-                    SubCommand::with_name("data")
-                        .about("get data about image")
+                    SubCommand::with_name("info")
+                        .about("get information about image")
                         .arg(
                             Arg::with_name("id")
                                 .index(1)
