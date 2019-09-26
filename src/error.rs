@@ -1,20 +1,24 @@
 use derive_more::*;
 
-use ass_rs::AssError;
+use ass_rs::{AssError, AssErrorKind};
 use std::error::Error;
 
 #[derive(Debug, Display)]
 #[display(fmt = "{}", kind)]
 pub struct AssCliError {
     pub kind: AssCliErrorKind,
-    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+    pub source: Option<Box<dyn Error + Send + Sync + 'static>>,
 }
 
 #[derive(Debug, Display, Eq, PartialEq)]
 pub enum AssCliErrorKind {
-    #[display(fmt = "Error accessing ASS")]
-    AssError,
-    #[display(fmt = "Error parsing arguments: {}", .0)]
+    #[display(fmt = "Error accessing ASS: {}", _0)]
+    AssError(String),
+    #[display(fmt = "Url does not match account")]
+    UrlDoesNotMatchAccount,
+    #[display(fmt = "Invalid account file: {}", _0)]
+    InvalidAccountFile(String),
+    #[display(fmt = "Error parsing arguments: {}", _0)]
     ArgumentParseError(String),
     #[display(fmt = "Error parsing json")]
     JsonError,
@@ -25,6 +29,13 @@ pub enum AssCliErrorKind {
 }
 
 impl AssCliError {
+    pub fn invalid_account_file(msg: String)  -> Self {
+        AssCliError {
+            kind: AssCliErrorKind::InvalidAccountFile(msg),
+            source: None,
+        }
+    }
+
     pub fn json_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::JsonError,
@@ -51,8 +62,12 @@ impl From<clap::Error> for AssCliError {
 
 impl From<AssError> for AssCliError {
     fn from(err: AssError) -> AssCliError {
+        let kind = match err.kind {
+            AssErrorKind::UrlDoesNotMatchAccount(_) => AssCliErrorKind::UrlDoesNotMatchAccount,
+            _ => AssCliErrorKind::AssError(err.to_string())
+        };
         AssCliError {
-            kind: AssCliErrorKind::AssError,
+            kind,
             source: Some(Box::new(err)),
         }
     }

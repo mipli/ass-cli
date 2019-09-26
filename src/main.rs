@@ -1,6 +1,6 @@
 use ass_rs::Account;
 use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
-pub use error::AssCliError;
+pub use error::{AssCliError, AssCliErrorKind};
 use std::path::PathBuf;
 use termcolor::{BufferWriter, ColorChoice};
 
@@ -9,7 +9,13 @@ mod file;
 mod image;
 mod sign;
 
-fn main() -> Result<(), AssCliError> {
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+    }
+}
+
+fn run() -> Result<(), AssCliError> {
     let config_dir = dirs::config_dir().ok_or(AssCliError::path_error())?;
     let config_dir_string = config_dir.to_str().ok_or(AssCliError::path_error())?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
@@ -143,10 +149,16 @@ fn main() -> Result<(), AssCliError> {
 fn get_account(config_dir: &PathBuf, matches: &ArgMatches) -> Result<Account, AssCliError> {
     let account = if let Some(acc) = matches.value_of("account") {
         let path = config_dir.join(format!("ass-cli/{}.json", acc));
-        Account::from_file(path)?
+        Account::from_file(&path).map_err(|_| {
+            let path = match path.to_str() {
+                Some(p) => p.to_string(),
+                None => "Unknown path".to_string(),
+            };
+            AssCliError::invalid_account_file(path)
+        })?
     } else {
         let config = matches.value_of("config").unwrap_or("account.json");
-        Account::from_file(&config)?
+        Account::from_file(&config).map_err(|_| AssCliError::invalid_account_file(config.to_string()))?
     };
     Ok(account)
 }
