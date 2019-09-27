@@ -1,6 +1,6 @@
 [package]
 name = "ass-cli"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 description = "A small CLI tool for working with Aptoma Smooth Storage"
 edition = "2018"
