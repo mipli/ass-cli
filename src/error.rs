@@ -31,6 +31,13 @@ pub enum AssCliErrorKind {
 }
 
 impl AssCliError {
+    pub fn argument_parse_error(msg: String)  -> Self {
+        AssCliError {
+            kind: AssCliErrorKind::ArgumentParseError(msg),
+            source: None,
+        }
+    }
+
     pub fn invalid_account_file(msg: String)  -> Self {
         AssCliError {
             kind: AssCliErrorKind::InvalidAccountFile(msg),

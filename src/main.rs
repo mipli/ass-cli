@@ -92,6 +92,7 @@ fn run() -> Result<(), AssCliError> {
                             Arg::with_name("destination")
                                 .short("d")
                                 .long("destination")
+                                .default_value("/")
                                 .takes_value(true)
                                 .help("destination folder on server"),
                         )
@@ -100,6 +101,7 @@ fn run() -> Result<(), AssCliError> {
                                 .short("c")
                                 .long("cache")
                                 .default_value("31557600")
+                                .takes_value(true)
                                 .help("cache time for uploaded file, in seconds"),
                         )
                         .arg(
