@@ -1,4 +1,4 @@
-use ass_rs::Account;
+use ass_rs::AssClient;
 use clap::{App, AppSettings, Arg, ArgMatches, SubCommand};
 pub use error::{AssCliError, AssCliErrorKind};
 use std::path::PathBuf;
@@ -117,6 +117,16 @@ fn run() -> Result<(), AssCliError> {
                         .arg(Arg::with_name("path").required(true).help(
                             "file path to search for. Path is exact match, use '%' as wildcard",
                         )),
+                )
+                .subcommand(
+                    SubCommand::with_name("info")
+                        .about("Get basic information about file")
+                        .arg(Arg::with_name("path").required(true).help("File path")),
+                )
+                .subcommand(
+                    SubCommand::with_name("render")
+                        .about("Render preview of file")
+                        .arg(Arg::with_name("id").required(true).help("File id")),
                 ),
         )
         .subcommand(
@@ -129,7 +139,7 @@ fn run() -> Result<(), AssCliError> {
         )
         .get_matches();
 
-    let account = get_account(&config_dir, &matches)?;
+    let ass_client = get_ass_client(&config_dir, &matches)?;
 
     let verbose = matches.is_present("verbose");
 
@@ -137,9 +147,9 @@ fn run() -> Result<(), AssCliError> {
     let mut buffer = bufwtr.buffer();
 
     match matches.subcommand() {
-        ("image", Some(matches)) => image::handle(&account, matches, &mut buffer, verbose)?,
-        ("file", Some(matches)) => file::handle(&account, matches, &mut buffer, verbose)?,
-        ("sign", Some(matches)) => sign::handle(&account, matches, &mut buffer, verbose)?,
+        ("image", Some(matches)) => image::handle(&ass_client, matches, &mut buffer, verbose)?,
+        ("file", Some(matches)) => file::handle(&ass_client, matches, &mut buffer, verbose)?,
+        ("sign", Some(matches)) => sign::handle(&ass_client, matches, &mut buffer, verbose)?,
         _ => {}
     }
 
@@ -148,10 +158,10 @@ fn run() -> Result<(), AssCliError> {
     Ok(())
 }
 
-fn get_account(config_dir: &PathBuf, matches: &ArgMatches) -> Result<Account, AssCliError> {
-    let account = if let Some(acc) = matches.value_of("account") {
+fn get_ass_client(config_dir: &PathBuf, matches: &ArgMatches) -> Result<AssClient, AssCliError> {
+    let ass_client = if let Some(acc) = matches.value_of("account") {
         let path = config_dir.join(format!("ass-cli/{}.json", acc));
-        Account::from_file(&path).map_err(|_| {
+        AssClient::from_file(&path).map_err(|_| {
             let path = match path.to_str() {
                 Some(p) => p.to_string(),
                 None => "Unknown path".to_string(),
@@ -160,7 +170,8 @@ fn get_account(config_dir: &PathBuf, matches: &ArgMatches) -> Result<Account, As
         })?
     } else {
         let config = matches.value_of("config").unwrap_or("account.json");
-        Account::from_file(&config).map_err(|_| AssCliError::invalid_account_file(config.to_string()))?
+        AssClient::from_file(&config)
+            .map_err(|_| AssCliError::invalid_account_file(config.to_string()))?
     };
-    Ok(account)
+    Ok(ass_client)
 }

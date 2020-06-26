@@ -4,7 +4,7 @@ use ass_rs::{AssError, AssErrorKind};
 use std::error::Error;
 
 #[derive(Debug, Display)]
-#[display(fmt = "{}", kind)]
+#[display(fmt = "{}: {:?}", kind, source)]
 pub struct AssCliError {
     pub kind: AssCliErrorKind,
     pub source: Option<Box<dyn Error + Send + Sync + 'static>>,
@@ -31,14 +31,14 @@ pub enum AssCliErrorKind {
 }
 
 impl AssCliError {
-    pub fn argument_parse_error(msg: String)  -> Self {
+    pub fn argument_parse_error(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::ArgumentParseError(msg),
             source: None,
         }
     }
 
-    pub fn invalid_account_file(msg: String)  -> Self {
+    pub fn invalid_account_file(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::InvalidAccountFile(msg),
             source: None,
@@ -80,7 +80,7 @@ impl From<AssError> for AssCliError {
     fn from(err: AssError) -> AssCliError {
         let kind = match err.kind {
             AssErrorKind::UrlDoesNotMatchAccount(_) => AssCliErrorKind::UrlDoesNotMatchAccount,
-            _ => AssCliErrorKind::AssError(err.to_string())
+            _ => AssCliErrorKind::AssError(err.to_string()),
         };
         AssCliError {
             kind,
