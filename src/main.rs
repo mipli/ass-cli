@@ -9,17 +9,18 @@ mod file;
 mod image;
 mod sign;
 
-fn main() {
-    if let Err(e) = run() {
+#[tokio::main]
+async fn main() {
+    if let Err(e) = run().await {
         eprintln!("Error: {}", e);
     }
 }
 
-fn run() -> Result<(), AssCliError> {
+async fn run() -> Result<(), AssCliError> {
     let config_dir = dirs::config_dir().ok_or(AssCliError::path_error())?;
     let config_dir_string = config_dir.to_str().ok_or(AssCliError::path_error())?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
-        .version("0.1")
+        .version("1.0")
         .author("Michael Plikk <michael@plikk.com>")
         .about("Tool to ease interaction with ASS from the CLI")
         .setting(AppSettings::ArgRequiredElseHelp)
@@ -121,12 +122,12 @@ fn run() -> Result<(), AssCliError> {
                 .subcommand(
                     SubCommand::with_name("info")
                         .about("Get basic information about file")
-                        .arg(Arg::with_name("path").required(true).help("File path")),
+                        .arg(Arg::with_name("key").required(true).help("File id or path")),
                 )
                 .subcommand(
                     SubCommand::with_name("render")
                         .about("Render preview of file")
-                        .arg(Arg::with_name("id").required(true).help("File id")),
+                        .arg(Arg::with_name("key").required(true).help("File id or path")),
                 ),
         )
         .subcommand(
@@ -147,8 +148,10 @@ fn run() -> Result<(), AssCliError> {
     let mut buffer = bufwtr.buffer();
 
     match matches.subcommand() {
-        ("image", Some(matches)) => image::handle(&ass_client, matches, &mut buffer, verbose)?,
-        ("file", Some(matches)) => file::handle(&ass_client, matches, &mut buffer, verbose)?,
+        ("image", Some(matches)) => {
+            image::handle(&ass_client, matches, &mut buffer, verbose).await?
+        }
+        ("file", Some(matches)) => file::handle(&ass_client, matches, &mut buffer, verbose).await?,
         ("sign", Some(matches)) => sign::handle(&ass_client, matches, &mut buffer, verbose)?,
         _ => {}
     }

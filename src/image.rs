@@ -6,30 +6,30 @@ use termcolor::{Color, ColorSpec, WriteColor};
 use crate::AssCliError;
 use ass_rs::{image_handling, AssClient};
 
-pub fn handle(
+pub async fn handle(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
     match matches.subcommand() {
-        ("data", Some(matches)) => get_data(ass_client, matches, buffer),
+        ("data", Some(matches)) => get_data(ass_client, matches, buffer).await,
         ("url", Some(matches)) => handle_url(ass_client, matches, buffer),
-        ("upload", Some(matches)) => handle_upload(ass_client, matches, buffer, verbose),
+        ("upload", Some(matches)) => handle_upload(ass_client, matches, buffer, verbose).await,
         _ => Err(AssCliError::command_error()),
     }
 }
 
-fn handle_upload(
+async fn handle_upload(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
     let files = values_t!(matches.values_of("files"), String)?;
 
     for file in &files {
-        let data = image_handling::upload_image(ass_client, file)?;
+        let data = image_handling::upload_image(ass_client, file).await?;
 
         if verbose {
             buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
@@ -45,13 +45,13 @@ fn handle_upload(
     Ok(())
 }
 
-fn get_data(
+async fn get_data(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
 ) -> Result<(), AssCliError> {
     let image_id = value_t!(matches, "id", u64)?;
-    let data = image_handling::get_image_information(ass_client, image_id)?;
+    let data = image_handling::get_image_information(ass_client, image_id).await?;
 
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
     write!(buffer, "\nOutput: ")?;

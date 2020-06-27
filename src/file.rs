@@ -6,30 +6,30 @@ use termcolor::{Color, ColorSpec, WriteColor};
 use crate::AssCliError;
 use ass_rs::{file_handling, image_handling, AssClient};
 
-pub fn handle(
+pub async fn handle(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
     match matches.subcommand() {
-        ("upload", Some(matches)) => handle_upload(ass_client, matches, buffer, verbose),
-        ("search", Some(matches)) => handle_search(ass_client, matches, buffer, verbose),
-        ("info", Some(matches)) => handle_info(ass_client, matches, buffer, verbose),
-        ("render", Some(matches)) => handle_render(ass_client, matches, buffer, verbose),
+        ("upload", Some(matches)) => handle_upload(ass_client, matches, buffer, verbose).await,
+        ("search", Some(matches)) => handle_search(ass_client, matches, buffer, verbose).await,
+        ("info", Some(matches)) => handle_info(ass_client, matches, buffer, verbose).await,
+        ("render", Some(matches)) => handle_render(ass_client, matches, buffer, verbose).await,
         _ => Err(AssCliError::command_error()),
     }
 }
 
-fn handle_search(
+async fn handle_search(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
     let path = value_t!(matches, "path", String)?;
     let queries = vec![("path", &path[..])];
-    let files = file_handling::search(ass_client, &queries)?;
+    let files = file_handling::search(ass_client, &queries).await?;
     for file in &files {
         if verbose {
             buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
@@ -44,9 +44,9 @@ fn handle_search(
     Ok(())
 }
 
-fn handle_upload(
+async fn handle_upload(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
@@ -63,7 +63,8 @@ fn handle_upload(
             file,
             &destination,
             &[("Cache-Control", &format!("max-age: {}", cache_time))],
-        )?;
+        )
+        .await?;
 
         if verbose {
             buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
@@ -86,14 +87,19 @@ fn write_url(url: &str, buffer: &mut Buffer) -> Result<(), AssCliError> {
     Ok(())
 }
 
-fn handle_info(
+async fn handle_info(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
-    let path = value_t!(matches, "path", String)?;
-    let information = file_handling::get_file_information(ass_client, &path)?;
+    let information = match value_t!(matches, "key", u64) {
+        Ok(file_id) => file_handling::get_file_information_by_id(ass_client, file_id).await?,
+        Err(_) => {
+            let key = value_t!(matches, "key", String)?;
+            file_handling::get_file_information(ass_client, &key).await?
+        }
+    };
     if verbose {
         writeln!(buffer, "Raw file information: {:#?}", information)?;
     }
@@ -114,19 +120,24 @@ fn handle_info(
     Ok(())
 }
 
-fn handle_render(
+async fn handle_render(
     ass_client: &AssClient,
-    matches: &ArgMatches,
+    matches: &ArgMatches<'static>,
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
-    let file_id = value_t!(matches, "id", u64)?;
-    let information = file_handling::get_file_rendition(ass_client, file_id)?;
-    let image_id = information.id;
+    let image_data = match value_t!(matches, "key", u64) {
+        Ok(file_id) => file_handling::get_file_rendition(ass_client, file_id).await?,
+        Err(_) => {
+            let key = value_t!(matches, "key", String)?;
+            let file_information = file_handling::get_file_information(ass_client, &key).await?;
+            file_handling::get_file_rendition(ass_client, file_information.id).await?
+        }
+    };
     if verbose {
-        writeln!(buffer, "Rendered iamge: {:#?}", information)?;
+        writeln!(buffer, "Raw iamge data: {:#?}", image_data)?;
     }
-    let url = image_handling::get_image_url(ass_client, image_id)?;
+    let url = image_handling::get_image_url(ass_client, image_data.id)?;
     write_url(&url, buffer)?;
     Ok(())
 }
