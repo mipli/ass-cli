@@ -55,7 +55,7 @@ dependencies = [
 name = "ass-cli"
 version = "1.0.0"
 dependencies = [
- "ass-rs 3.0.0",
+ "ass-rs 3.0.0 (git+https://github.com/mipli/ass-rs?branch=file-renditions-support)",
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive_more 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -68,6 +68,7 @@ dependencies = [
 [[package]]
 name = "ass-rs"
 version = "3.0.0"
+source = "git+https://github.com/mipli/ass-rs?branch=file-renditions-support#9136d1d1b0e71ea2c3ec26731edd7a0d275886dd"
 dependencies = [
  "chrono 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive_more 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1640,6 +1641,7 @@ dependencies = [
 "checksum arc-swap 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)" = "4d25d88fd6b8041580a654f9d0c581a047baee2b3efee13275f2fc392fc75034"
 "checksum argon2rs 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "3f67b0b6a86dae6e67ff4ca2b6201396074996379fba2b92ff649126f37cb392"
 "checksum arrayvec 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)" = "92c7fb76bc8826a8b33b4ee5bb07a247a81e76764ab4d55e8f73e3a4d8808c71"
+"checksum ass-rs 3.0.0 (git+https://github.com/mipli/ass-rs?branch=file-renditions-support)" = "<none>"
 "checksum assert-json-diff 1.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "9c356497fd3417158bcb318266ac83c391219ca3a5fa659049f42e0041ab57d6"
 "checksum atty 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)" = "9a7d5b8723950951411ee34d271d99dddcc2035a16ab25310ea2c8cfd4369652"
 "checksum autocfg 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "b671c8fb71b457dd4ae18c4ba1e59aa81793daacc361d82fcd410cef0d491875"
