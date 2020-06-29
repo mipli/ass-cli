@@ -97,7 +97,7 @@ async fn handle_info(
         Ok(file_id) => file_handling::get_file_information_by_id(ass_client, file_id).await?,
         Err(_) => {
             let key = value_t!(matches, "key", String)?;
-            file_handling::get_file_information(ass_client, &key).await?
+            file_handling::get_file_information_by_path(ass_client, &key).await?
         }
     };
     if verbose {
@@ -130,7 +130,8 @@ async fn handle_render(
         Ok(file_id) => file_handling::get_file_rendition(ass_client, file_id).await?,
         Err(_) => {
             let key = value_t!(matches, "key", String)?;
-            let file_information = file_handling::get_file_information(ass_client, &key).await?;
+            let file_information =
+                file_handling::get_file_information_by_path(ass_client, &key).await?;
             file_handling::get_file_rendition(ass_client, file_information.id).await?
         }
     };
