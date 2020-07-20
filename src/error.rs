@@ -1,4 +1,4 @@
-use derive_more::*;
+use derive_more::Display;
 
 use ass_rs::{AssError, AssErrorKind};
 use std::error::Error;
@@ -31,6 +31,7 @@ pub enum AssCliErrorKind {
 }
 
 impl AssCliError {
+    #[must_use]
     pub fn argument_parse_error(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::ArgumentParseError(msg),
@@ -38,6 +39,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn invalid_account_file(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::InvalidAccountFile(msg),
@@ -45,6 +47,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn command_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::CommandError,
@@ -52,6 +55,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn json_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::JsonError,
@@ -59,6 +63,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn path_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::PathError,

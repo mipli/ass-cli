@@ -93,12 +93,11 @@ async fn handle_info(
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
-    let information = match value_t!(matches, "key", u64) {
-        Ok(file_id) => file_handling::get_file_information_by_id(ass_client, file_id).await?,
-        Err(_) => {
-            let key = value_t!(matches, "key", String)?;
-            file_handling::get_file_information_by_path(ass_client, &key).await?
-        }
+    let information = if let Ok(file_id) = value_t!(matches, "key", u64) {
+        file_handling::get_file_information_by_id(ass_client, file_id).await?
+    } else {
+        let key = value_t!(matches, "key", String)?;
+        file_handling::get_file_information_by_path(ass_client, &key).await?
     };
     if verbose {
         writeln!(buffer, "Raw file information: {:#?}", information)?;
@@ -109,13 +108,9 @@ async fn handle_info(
     buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
     writeln!(buffer, "{}", information.id)?;
 
-    buffer.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
-    write!(buffer, "URL: ")?;
-    buffer.set_color(ColorSpec::new().set_fg(Some(Color::White)))?;
-    writeln!(
+    write_url(
+        &file_handling::get_file_url(ass_client, &information.path)?,
         buffer,
-        "{}",
-        file_handling::get_file_url(ass_client, &information.path)?
     )?;
     Ok(())
 }
@@ -126,14 +121,13 @@ async fn handle_render(
     buffer: &mut Buffer,
     verbose: bool,
 ) -> Result<(), AssCliError> {
-    let image_data = match value_t!(matches, "key", u64) {
-        Ok(file_id) => file_handling::get_file_rendition(ass_client, file_id).await?,
-        Err(_) => {
-            let key = value_t!(matches, "key", String)?;
-            let file_information =
-                file_handling::get_file_information_by_path(ass_client, &key).await?;
-            file_handling::get_file_rendition(ass_client, file_information.id).await?
-        }
+    let image_data = if let Ok(file_id) = value_t!(matches, "key", u64) {
+        file_handling::get_file_rendition(ass_client, file_id).await?
+    } else {
+        let key = value_t!(matches, "key", String)?;
+        let file_information =
+            file_handling::get_file_information_by_path(ass_client, &key).await?;
+        file_handling::get_file_rendition(ass_client, file_information.id).await?
     };
     if verbose {
         writeln!(buffer, "Raw iamge data: {:#?}", image_data)?;

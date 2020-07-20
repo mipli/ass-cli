@@ -17,8 +17,8 @@ async fn main() {
 }
 
 async fn run() -> Result<(), AssCliError> {
-    let config_dir = dirs::config_dir().ok_or(AssCliError::path_error())?;
-    let config_dir_string = config_dir.to_str().ok_or(AssCliError::path_error())?;
+    let config_dir = dirs::config_dir().ok_or_else(AssCliError::path_error)?;
+    let config_dir_string = config_dir.to_str().ok_or_else(AssCliError::path_error)?;
     let matches = App::new("ASS (Aptoma Smooth Storage) CLI tool")
         .version("1.0")
         .author("Michael Plikk <michael@plikk.com>")
