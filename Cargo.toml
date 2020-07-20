@@ -1,6 +1,6 @@
 [package]
 name = "ass-cli"
-version = "0.2.0"
+version = "1.0.0"
 authors = ["Michael A. Plikk <michael@plikk.com>"]
 description = "A small CLI tool for working with Aptoma Smooth Storage"
 edition = "2018"
@@ -11,10 +11,10 @@ keywords = []
 
 [dependencies]
 clap = "2.33.0"
-serde = "1.0.85"
-serde_derive = "1.0.85"
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.36"
 termcolor = "1.0.4"
 dirs = "1.0.4"
-derive_more = "0.15.*"
-ass-rs = "2.0.0"
+derive_more = "0.15"
+ass-rs = "3.0.0"
+tokio = { version = "0.2", features = ["full"] }

@@ -1,10 +1,10 @@
-use derive_more::*;
+use derive_more::Display;
 
 use ass_rs::{AssError, AssErrorKind};
 use std::error::Error;
 
 #[derive(Debug, Display)]
-#[display(fmt = "{}", kind)]
+#[display(fmt = "{}: {:?}", kind, source)]
 pub struct AssCliError {
     pub kind: AssCliErrorKind,
     pub source: Option<Box<dyn Error + Send + Sync + 'static>>,
@@ -31,20 +31,23 @@ pub enum AssCliErrorKind {
 }
 
 impl AssCliError {
-    pub fn argument_parse_error(msg: String)  -> Self {
+    #[must_use]
+    pub fn argument_parse_error(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::ArgumentParseError(msg),
             source: None,
         }
     }
 
-    pub fn invalid_account_file(msg: String)  -> Self {
+    #[must_use]
+    pub fn invalid_account_file(msg: String) -> Self {
         AssCliError {
             kind: AssCliErrorKind::InvalidAccountFile(msg),
             source: None,
         }
     }
 
+    #[must_use]
     pub fn command_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::CommandError,
@@ -52,6 +55,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn json_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::JsonError,
@@ -59,6 +63,7 @@ impl AssCliError {
         }
     }
 
+    #[must_use]
     pub fn path_error() -> Self {
         AssCliError {
             kind: AssCliErrorKind::PathError,
@@ -80,7 +85,7 @@ impl From<AssError> for AssCliError {
     fn from(err: AssError) -> AssCliError {
         let kind = match err.kind {
             AssErrorKind::UrlDoesNotMatchAccount(_) => AssCliErrorKind::UrlDoesNotMatchAccount,
-            _ => AssCliErrorKind::AssError(err.to_string())
+            _ => AssCliErrorKind::AssError(err.to_string()),
         };
         AssCliError {
             kind,
