@@ -15,6 +15,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.36"
 termcolor = "1.0.4"
 dirs = "1.0.4"
-derive_more = "0.15.*"
-ass-rs = { git = "https://github.com/mipli/ass-rs", branch = "file-renditions-support" }
+derive_more = "0.15"
+ass-rs = "3.0.0"
 tokio = { version = "0.2", features = ["full"] }

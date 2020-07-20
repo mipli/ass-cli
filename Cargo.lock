@@ -35,7 +35,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "ass-cli"
 version = "1.0.0"
 dependencies = [
- "ass-rs 3.0.0 (git+https://github.com/mipli/ass-rs?branch=file-renditions-support)",
+ "ass-rs 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.33.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive_more 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -48,7 +48,7 @@ dependencies = [
 [[package]]
 name = "ass-rs"
 version = "3.0.0"
-source = "git+https://github.com/mipli/ass-rs?branch=file-renditions-support#8cb110f92d36944134e2e58ec5fb9413e468acd8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "derive_more 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1406,7 +1406,7 @@ dependencies = [
 "checksum arc-swap 0.4.7 (registry+https://github.com/rust-lang/crates.io-index)" = "4d25d88fd6b8041580a654f9d0c581a047baee2b3efee13275f2fc392fc75034"
 "checksum arrayref 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
 "checksum arrayvec 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cff77d8686867eceff3105329d4698d96c2391c176d5d03adc90c7389162b5b8"
-"checksum ass-rs 3.0.0 (git+https://github.com/mipli/ass-rs?branch=file-renditions-support)" = "<none>"
+"checksum ass-rs 3.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0dc4483425738106e88d6502f12b612fa02964df2fd3ee259f88bea3bf0a1fdd"
 "checksum assert-json-diff 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "4259cbe96513d2f1073027a259fc2ca917feb3026a5a8d984e3628e490255cc0"
 "checksum atty 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
 "checksum autocfg 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f8aac770f1885fd7e387acedd76065302551364496e46b3dd00860b2f8359b9d"
